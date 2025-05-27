@@ -1,0 +1,10 @@
+<!-- app/src/main/res/menu/menu_articles.xml -->
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/action_filter"
+        android:title="Фильтр по тегам"
+        app:showAsAction="always"
+        app:actionViewClass="androidx.appcompat.widget.AppCompatSpinner" />
+</menu>

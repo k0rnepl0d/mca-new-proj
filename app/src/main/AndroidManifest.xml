@@ -1,0 +1,58 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
+
+    <application
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:name=".MCNewsApp"
+        android:allowBackup="true"
+        android:theme="@style/Theme.MCNews"
+        android:requestLegacyExternalStorage="true">
+
+        <!-- Активность входа -->
+        <activity
+            android:name=".ui.auth.LoginActivity"
+            android:exported="false" />
+
+        <!-- Активность регистрации -->
+        <activity
+            android:name=".ui.auth.RegisterActivity"
+            android:exported="false" />
+
+        <!-- Главная активность - стартовая для тестирования -->
+        <activity
+            android:name=".ui.MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ui.articles.ArticleDetailActivity"
+            android:exported="false"/>
+
+        <activity
+            android:name=".ui.edit.EditArticleActivity"
+            android:exported="false"
+            android:label="Edit article" />
+
+        <!-- FileProvider для работы с камерой и файлами -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
+
+    </application>
+</manifest>

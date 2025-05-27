@@ -1,0 +1,39 @@
+<!-- app/src/main/res/values/strings.xml -->
+<resources>
+    <string name="action_settings">Настройки</string>
+    <string name="fab_add_article">Добавить статью</string>
+    <string name="title_splash">Заставка</string>
+    <string name="title_articles">Статьи</string>
+    <string name="search_hint">Поиск по названию статьи</string>
+    <string name="no_articles_found">Статьи не найдены</string>
+    <string name="splash_logo_description">Новости о микроконтроллёрах</string>
+
+    <!-- Auth strings -->
+    <string name="app_logo">Логотип приложения</string>
+    <string name="login_title">Вход</string>
+    <string name="register_title">Регистрация</string>
+    <string name="login_hint">Логин</string>
+    <string name="password_hint">Пароль</string>
+    <string name="login_button">Войти</string>
+    <string name="register_button">Зарегистрироваться</string>
+    <string name="register_prompt">Нет аккаунта? Зарегистрируйтесь</string>
+    <string name="login_prompt">Уже есть аккаунт? Войти</string>
+
+    <!-- Register form -->
+    <string name="first_name_hint">Имя</string>
+    <string name="last_name_hint">Фамилия</string>
+    <string name="middle_name_hint">Отчество (необязательно)</string>
+    <string name="birth_date_label">Дата рождения</string>
+    <string name="gender_label">Пол</string>
+    <string name="email_hint">Email</string>
+    <string name="confirm_password_hint">Подтвердите пароль</string>
+
+    <!-- Logout -->
+    <string name="logout">Выйти</string>
+    <string name="profile">Профиль</string>
+
+    <string-array name="gender_array">
+        <item>Мужской</item>
+        <item>Женский</item>
+    </string-array>
+</resources>
