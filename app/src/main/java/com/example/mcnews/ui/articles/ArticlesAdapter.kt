@@ -8,10 +8,11 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import coil.load
 import com.example.mcnews.R
 import com.example.mcnews.databinding.ItemArticleBinding
 import com.example.mcnews.domain.model.Article
+import java.text.SimpleDateFormat
+import java.util.*
 
 class ArticlesAdapter(
     private val onClick: (Article) -> Unit,
@@ -40,10 +41,22 @@ class ArticlesAdapter(
             tvTitle.text = article.title
             tvBody.text = if (article.body.length > 120) article.body.take(120) + "…" else article.body
 
+            // Отображение даты публикации
+            try {
+                val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
+                val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+                val date = inputFormat.parse(article.createdAt)
+                tvDate.text = date?.let { dateFormat.format(it) } ?: article.createdAt
+                tvDate.visibility = View.VISIBLE
+            } catch (e: Exception) {
+                // Если не удалось распарсить дату, показываем как есть
+                tvDate.text = article.createdAt
+                tvDate.visibility = View.VISIBLE
+            }
+
             // Обрабатываем изображение
             if (!article.imageUrl.isNullOrEmpty()) {
                 try {
-                    // Декодируем base64 в bitmap
                     val imageBytes = Base64.decode(article.imageUrl, Base64.DEFAULT)
                     val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
 
@@ -51,17 +64,14 @@ class ArticlesAdapter(
                         imgPreview.setImageBitmap(bitmap)
                         imgPreview.visibility = View.VISIBLE
                     } else {
-                        // Если bitmap null, показываем placeholder
                         imgPreview.setImageResource(R.drawable.ic_image_placeholder)
                         imgPreview.visibility = View.VISIBLE
                     }
                 } catch (e: Exception) {
-                    // Если не удалось декодировать, показываем placeholder
                     imgPreview.setImageResource(R.drawable.ic_image_placeholder)
                     imgPreview.visibility = View.VISIBLE
                 }
             } else {
-                // Если изображения нет, показываем placeholder
                 imgPreview.setImageResource(R.drawable.ic_image_placeholder)
                 imgPreview.visibility = View.VISIBLE
             }

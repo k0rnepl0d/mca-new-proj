@@ -25,6 +25,9 @@
         <action
             android:id="@+id/action_articles_to_editor"
             app:destination="@id/editorFragment" />
+        <action
+            android:id="@+id/action_articles_to_my_articles"
+            app:destination="@id/userArticlesFragment" />
     </fragment>
 
     <fragment
@@ -44,6 +47,18 @@
         android:label="Профиль">
         <action
             android:id="@+id/action_profile_to_articles"
+            app:destination="@id/articlesFragment"
+            app:popUpTo="@id/articlesFragment"
+            app:popUpToInclusive="false" />
+    </fragment>
+
+    <!-- ДОБАВЛЕНИЕ: Фрагмент "Ваши статьи" -->
+    <fragment
+        android:id="@+id/userArticlesFragment"
+        android:name="com.example.mcnews.ui.articles.UserArticlesFragment"
+        android:label="Ваши статьи">
+        <action
+            android:id="@+id/action_my_articles_to_articles"
             app:destination="@id/articlesFragment"
             app:popUpTo="@id/articlesFragment"
             app:popUpToInclusive="false" />

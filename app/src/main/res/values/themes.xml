@@ -1,10 +1,33 @@
-
 <resources xmlns:tools="http://schemas.android.com/tools">
     <style name="Theme.MCNews" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorSecondary">@color/secondary</item>
         <item name="android:statusBarColor">@color/primary</item>
         <item name="android:windowLightStatusBar" tools:targetApi="23">false</item>
+
+        <!-- Стили для FAB -->
+        <item name="floatingActionButtonStyle">@style/Widget.MCNews.FloatingActionButton</item>
+        <item name="extendedFloatingActionButtonStyle">@style/Widget.MCNews.ExtendedFloatingActionButton</item>
+    </style>
+
+    <!-- Кастомный стиль для обычной FAB -->
+    <style name="Widget.MCNews.FloatingActionButton" parent="Widget.Material3.FloatingActionButton.Primary">
+        <item name="backgroundTint">?attr/colorPrimary</item>
+        <item name="tint">@android:color/white</item>
+        <item name="elevation">6dp</item>
+        <item name="pressedTranslationZ">12dp</item>
+        <item name="rippleColor">@android:color/white</item>
+        <item name="borderWidth">0dp</item>
+    </style>
+
+    <!-- Кастомный стиль для расширенной FAB -->
+    <style name="Widget.MCNews.ExtendedFloatingActionButton" parent="Widget.Material3.ExtendedFloatingActionButton.Primary">
+        <item name="backgroundTint">?attr/colorPrimary</item>
+        <item name="android:textColor">@android:color/white</item>
+        <item name="iconTint">@android:color/white</item>
+        <item name="elevation">6dp</item>
+        <item name="pressedTranslationZ">12dp</item>
+        <item name="rippleColor">@android:color/white</item>
+        <item name="cornerRadius">28dp</item>
     </style>
 </resources>
-

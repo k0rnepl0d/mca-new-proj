@@ -1,6 +1,11 @@
-
 <resources>
     <color name="primary">#00698C</color>
+    <color name="primary_dark">#004D66</color>
     <color name="secondary">#009CC6</color>
     <color name="accent">#FF4081</color>
+
+    <!-- Дополнительные цвета для FAB -->
+    <color name="fab_primary">#00698C</color>
+    <color name="fab_pressed">#004D66</color>
+    <color name="white_overlay">#33FFFFFF</color>
 </resources>

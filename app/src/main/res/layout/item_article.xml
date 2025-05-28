@@ -30,7 +30,19 @@
             android:id="@+id/tvBody"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxLines="3"/>
+            android:maxLines="3"
+            android:layout_marginTop="4dp"/>
+
+        <!-- ДОБАВЛЕНИЕ: Дата публикации -->
+        <TextView
+            android:id="@+id/tvDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="12sp"
+            android:textColor="@android:color/darker_gray"
+            android:gravity="end"
+            android:visibility="gone"/>
 
     </LinearLayout>
 </androidx.cardview.widget.CardView>

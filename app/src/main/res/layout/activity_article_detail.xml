@@ -24,10 +24,43 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 
+        <!-- ДОБАВЛЕНИЕ: Автор -->
+        <TextView
+            android:id="@+id/tvAuthor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:visibility="gone"/>
+
+        <!-- ДОБАВЛЕНИЕ: Дата публикации -->
+        <TextView
+            android:id="@+id/tvDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp"
+            android:textColor="@android:color/darker_gray"
+            android:visibility="gone"/>
+
+        <!-- ДОБАВЛЕНИЕ: Теги -->
+        <TextView
+            android:id="@+id/tvTags"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:textSize="14sp"
+            android:textColor="?attr/colorPrimary"
+            android:visibility="gone"/>
+
         <TextView
             android:id="@+id/tvBody"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="16dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:textSize="16sp"
+            android:lineSpacingExtra="4dp"/>
+
     </LinearLayout>
 </ScrollView>

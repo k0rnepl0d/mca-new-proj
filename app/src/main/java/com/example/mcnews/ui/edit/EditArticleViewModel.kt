@@ -40,7 +40,7 @@ class EditArticleViewModel @Inject constructor(
         statusId: Int,
         authorId: Int,
         imageBase64: String? = null,
-        tagIds: List<Int> = emptyList()
+        tagIds: List<Int> = emptyList() // ИЗМЕНЕНИЕ: принимаем список тегов
     ): Boolean {
         return try {
             val titlePart = title.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -48,7 +48,7 @@ class EditArticleViewModel @Inject constructor(
             val authorIdPart = authorId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
             val statusIdPart = statusId.toString().toRequestBody("text/plain".toMediaTypeOrNull())
 
-            // Конвертируем теги в JSON строку
+            // ИСПРАВЛЕНИЕ: Правильно конвертируем теги в JSON строку
             val tagIdsJson = if (tagIds.isNotEmpty()) {
                 "[${tagIds.joinToString(",")}]"
             } else {
@@ -58,9 +58,13 @@ class EditArticleViewModel @Inject constructor(
 
             // Обрабатываем изображение
             val imagePart = imageBase64?.let { base64 ->
-                val imageBytes = Base64.decode(base64, Base64.DEFAULT)
-                val requestBody = imageBytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
-                MultipartBody.Part.createFormData("image", "article_image.jpg", requestBody)
+                try {
+                    val imageBytes = Base64.decode(base64, Base64.DEFAULT)
+                    val requestBody = imageBytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                    MultipartBody.Part.createFormData("image", "article_image.jpg", requestBody)
+                } catch (e: Exception) {
+                    null // Если не удалось декодировать base64, игнорируем изображение
+                }
             }
 
             if (articleId == -1) {

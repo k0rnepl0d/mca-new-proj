@@ -9,10 +9,11 @@ fun ArticleDto.toDomain() = Article(
     authorId  = author.userId,
     title     = title,
     body      = body,
-    imageUrl  = imageBase64, // Просто передаем base64 строку как есть
+    imageUrl  = imageBase64,
     statusId  = status.statusId,
     createdAt = createdAt,
-    tags      = tags.map { Tag(it.tagId, it.name) }
+    tags      = tags.map { Tag(it.tagId, it.name) },
+    authorName = "${author.firstName} ${author.lastName}".trim()
 )
 // endregion
 

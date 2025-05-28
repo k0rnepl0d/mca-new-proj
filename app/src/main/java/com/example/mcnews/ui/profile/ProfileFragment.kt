@@ -51,6 +51,7 @@ class ProfileFragment : Fragment() {
 
     private var currentUser: Any? = null
     private var selectedImageUri: Uri? = null
+    private var selectedImageBase64: String? = null
 
     // Activity result launchers
     private val imagePickerLauncher = registerForActivityResult(
@@ -149,130 +150,6 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun checkStoragePermissionAndGeneratePdf() {
-        // На Android 10+ (API 29+) не нужно разрешение для сохранения в общую папку
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            generateProfilePdf()
-        } else {
-            // Для старых версий Android проверяем разрешение
-            if (ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ) == PackageManager.PERMISSION_GRANTED) {
-                generateProfilePdf()
-            } else {
-                storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
-            }
-        }
-    }
-
-    private fun generateProfilePdf() {
-        lifecycleScope.launch {
-            try {
-                binding.progressBar.visibility = View.VISIBLE
-
-                // Получаем PDF от API
-                val response = apiService.getProfilePdf()
-
-                if (response.isSuccessful) {
-                    val pdfBytes = response.body()?.bytes()
-                    if (pdfBytes != null) {
-                        savePdfFile(pdfBytes)
-                    } else {
-                        Snackbar.make(binding.root, "Ошибка: PDF файл пуст", Snackbar.LENGTH_LONG).show()
-                    }
-                } else {
-                    Snackbar.make(binding.root, "Ошибка генерации PDF: ${response.code()}", Snackbar.LENGTH_LONG).show()
-                }
-
-            } catch (e: Exception) {
-                Snackbar.make(binding.root, "Ошибка генерации PDF: ${e.localizedMessage}",
-                    Snackbar.LENGTH_LONG).show()
-            } finally {
-                binding.progressBar.visibility = View.GONE
-            }
-        }
-    }
-
-    private fun savePdfFile(pdfBytes: ByteArray) {
-        try {
-            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-            val fileName = "profile_$timestamp.pdf"
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                // Для Android 10+ используем MediaStore
-                savePdfToMediaStore(pdfBytes, fileName)
-            } else {
-                // Для старых версий сохраняем в Downloads
-                savePdfToDownloads(pdfBytes, fileName)
-            }
-        } catch (e: Exception) {
-            Snackbar.make(binding.root, "Ошибка сохранения файла: ${e.localizedMessage}",
-                Snackbar.LENGTH_LONG).show()
-        }
-    }
-
-    private fun savePdfToMediaStore(pdfBytes: ByteArray, fileName: String) {
-        val resolver = requireContext().contentResolver
-        val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
-            put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
-        }
-
-        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
-        uri?.let { pdfUri ->
-            resolver.openOutputStream(pdfUri)?.use { outputStream ->
-                outputStream.write(pdfBytes)
-                outputStream.flush()
-            }
-
-            showPdfSavedDialog(fileName, pdfUri)
-        }
-    }
-
-    private fun savePdfToDownloads(pdfBytes: ByteArray, fileName: String) {
-        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        val file = File(downloadsDir, fileName)
-
-        FileOutputStream(file).use { outputStream ->
-            outputStream.write(pdfBytes)
-            outputStream.flush()
-        }
-
-        // Уведомляем систему о новом файле
-        val uri = FileProvider.getUriForFile(
-            requireContext(),
-            "${requireContext().packageName}.fileprovider",
-            file
-        )
-
-        showPdfSavedDialog(fileName, uri)
-    }
-
-    private fun showPdfSavedDialog(fileName: String, uri: Uri) {
-        AlertDialog.Builder(requireContext())
-            .setTitle("PDF сохранен")
-            .setMessage("Файл '$fileName' сохранен в папку Downloads")
-            .setPositiveButton("Открыть") { _, _ ->
-                openPdfFile(uri)
-            }
-            .setNegativeButton("OK", null)
-            .show()
-    }
-
-    private fun openPdfFile(uri: Uri) {
-        try {
-            val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, "application/pdf")
-                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            }
-            startActivity(intent)
-        } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Нет приложения для открытия PDF", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     private fun checkPermissionAndShowImageDialog() {
         if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA)
             != PackageManager.PERMISSION_GRANTED) {
@@ -308,19 +185,28 @@ class ProfileFragment : Fragment() {
 
     private fun handleImageSelection(uri: Uri) {
         try {
+            selectedImageUri = uri
+
             val inputStream: InputStream? = requireContext().contentResolver.openInputStream(uri)
             val bitmap = BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
 
-            // Сжимаем изображение
-            val byteArrayOutputStream = java.io.ByteArrayOutputStream()
-            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
-            val byteArray = byteArrayOutputStream.toByteArray()
-            val base64 = Base64.encodeToString(byteArray, Base64.DEFAULT)
+            if (bitmap != null) {
+                // Сжимаем изображение и конвертируем в base64
+                val byteArrayOutputStream = java.io.ByteArrayOutputStream()
+                bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
+                val byteArray = byteArrayOutputStream.toByteArray()
+                selectedImageBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT)
 
-            displayAvatar(base64)
+                // Отображаем изображение
+                binding.imgAvatar.setImageBitmap(bitmap)
+                binding.btnRemoveAvatar.visibility = View.VISIBLE
+            } else {
+                Toast.makeText(requireContext(), "Ошибка загрузки изображения", Toast.LENGTH_SHORT).show()
+            }
 
         } catch (e: Exception) {
-            Toast.makeText(requireContext(), "Ошибка обработки изображения", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Ошибка обработки изображения: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -339,6 +225,7 @@ class ProfileFragment : Fragment() {
         binding.imgAvatar.setImageResource(android.R.drawable.ic_menu_gallery)
         binding.btnRemoveAvatar.visibility = View.GONE
         selectedImageUri = null
+        selectedImageBase64 = null
     }
 
     private fun saveProfile() {
@@ -363,17 +250,20 @@ class ProfileFragment : Fragment() {
                 val middleNamePart = middleName.toRequestBody("text/plain".toMediaTypeOrNull())
                 val emailPart = email.toRequestBody("text/plain".toMediaTypeOrNull())
 
-                // Обрабатываем фото если выбрано новое
-                val photoPart = selectedImageUri?.let { uri ->
-                    val inputStream = requireContext().contentResolver.openInputStream(uri)
-                    val bytes = inputStream?.readBytes()
-                    bytes?.let {
-                        val requestBody = it.toRequestBody("image/jpeg".toMediaTypeOrNull())
+                // Корректная обработка фото
+                val photoPart = if (selectedImageUri != null && selectedImageBase64 != null) {
+                    try {
+                        val imageBytes = Base64.decode(selectedImageBase64, Base64.DEFAULT)
+                        val requestBody = imageBytes.toRequestBody("image/jpeg".toMediaTypeOrNull())
                         MultipartBody.Part.createFormData("photo", "avatar.jpg", requestBody)
+                    } catch (e: Exception) {
+                        null
                     }
+                } else {
+                    null
                 }
 
-                apiService.updateProfile(
+                val updatedUser = apiService.updateProfile(
                     firstName = firstNamePart,
                     lastName = lastNamePart,
                     middleName = middleNamePart,
@@ -382,6 +272,10 @@ class ProfileFragment : Fragment() {
                 )
 
                 Toast.makeText(requireContext(), "Профиль обновлен", Toast.LENGTH_SHORT).show()
+
+                // Сбрасываем состояние выбранного изображения
+                selectedImageUri = null
+                selectedImageBase64 = null
 
             } catch (e: Exception) {
                 Snackbar.make(binding.root, "Ошибка обновления профиля: ${e.localizedMessage}",
@@ -433,11 +327,148 @@ class ProfileFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
-                apiService.changePassword(oldPassword, newPassword)
-                Toast.makeText(requireContext(), "Пароль изменен", Toast.LENGTH_SHORT).show()
+                val response = apiService.changePassword(oldPassword, newPassword)
+
+                if (response.isSuccessful) {
+                    Toast.makeText(requireContext(), "Пароль успешно изменен", Toast.LENGTH_SHORT).show()
+                } else {
+                    val errorMessage = when (response.code()) {
+                        400 -> "Неверный текущий пароль"
+                        422 -> "Новый пароль не соответствует требованиям"
+                        500 -> "Ошибка сервера. Попробуйте позже"
+                        else -> "Ошибка смены пароля: ${response.code()}"
+                    }
+                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show()
+                }
+            } catch (e: retrofit2.HttpException) {
+                val errorMessage = when (e.code()) {
+                    400 -> "Неверный текущий пароль"
+                    422 -> "Новый пароль не соответствует требованиям"
+                    500 -> "Ошибка сервера. Попробуйте позже"
+                    else -> "Ошибка смены пароля: ${e.code()}"
+                }
+                Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_LONG).show()
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), "Ошибка изменения пароля: ${e.localizedMessage}", Toast.LENGTH_LONG).show()
             }
+        }
+    }
+
+    private fun checkStoragePermissionAndGeneratePdf() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            generateProfilePdf()
+        } else {
+            if (ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                ) == PackageManager.PERMISSION_GRANTED) {
+                generateProfilePdf()
+            } else {
+                storagePermissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+            }
+        }
+    }
+
+    private fun generateProfilePdf() {
+        lifecycleScope.launch {
+            try {
+                binding.progressBar.visibility = View.VISIBLE
+
+                val response = apiService.getProfilePdf()
+
+                if (response.isSuccessful) {
+                    val pdfBytes = response.body()?.bytes()
+                    if (pdfBytes != null) {
+                        savePdfFile(pdfBytes)
+                    } else {
+                        Snackbar.make(binding.root, "Ошибка: PDF файл пуст", Snackbar.LENGTH_LONG).show()
+                    }
+                } else {
+                    Snackbar.make(binding.root, "Ошибка генерации PDF: ${response.code()}", Snackbar.LENGTH_LONG).show()
+                }
+
+            } catch (e: Exception) {
+                Snackbar.make(binding.root, "Ошибка генерации PDF: ${e.localizedMessage}",
+                    Snackbar.LENGTH_LONG).show()
+            } finally {
+                binding.progressBar.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun savePdfFile(pdfBytes: ByteArray) {
+        try {
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+            val fileName = "profile_$timestamp.pdf"
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                savePdfToMediaStore(pdfBytes, fileName)
+            } else {
+                savePdfToDownloads(pdfBytes, fileName)
+            }
+        } catch (e: Exception) {
+            Snackbar.make(binding.root, "Ошибка сохранения файла: ${e.localizedMessage}",
+                Snackbar.LENGTH_LONG).show()
+        }
+    }
+
+    private fun savePdfToMediaStore(pdfBytes: ByteArray, fileName: String) {
+        val resolver = requireContext().contentResolver
+        val contentValues = ContentValues().apply {
+            put(MediaStore.MediaColumns.DISPLAY_NAME, fileName)
+            put(MediaStore.MediaColumns.MIME_TYPE, "application/pdf")
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS)
+        }
+
+        val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, contentValues)
+        uri?.let { pdfUri ->
+            resolver.openOutputStream(pdfUri)?.use { outputStream ->
+                outputStream.write(pdfBytes)
+                outputStream.flush()
+            }
+
+            showPdfSavedDialog(fileName, pdfUri)
+        }
+    }
+
+    private fun savePdfToDownloads(pdfBytes: ByteArray, fileName: String) {
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val file = File(downloadsDir, fileName)
+
+        FileOutputStream(file).use { outputStream ->
+            outputStream.write(pdfBytes)
+            outputStream.flush()
+        }
+
+        val uri = FileProvider.getUriForFile(
+            requireContext(),
+            "${requireContext().packageName}.fileprovider",
+            file
+        )
+
+        showPdfSavedDialog(fileName, uri)
+    }
+
+    private fun showPdfSavedDialog(fileName: String, uri: Uri) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("PDF сохранен")
+            .setMessage("Файл '$fileName' сохранен в папку Downloads")
+            .setPositiveButton("Открыть") { _, _ ->
+                openPdfFile(uri)
+            }
+            .setNegativeButton("OK", null)
+            .show()
+    }
+
+    private fun openPdfFile(uri: Uri) {
+        try {
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(uri, "application/pdf")
+                flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+            }
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "Нет приложения для открытия PDF", Toast.LENGTH_SHORT).show()
         }
     }
 

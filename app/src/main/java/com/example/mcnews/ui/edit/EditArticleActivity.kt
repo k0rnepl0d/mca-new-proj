@@ -10,6 +10,7 @@ import android.provider.MediaStore
 import android.util.Base64
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -24,6 +25,7 @@ import com.example.mcnews.databinding.ActivityArticleEditBinding
 import com.google.android.material.snackbar.Snackbar
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.delay
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import javax.inject.Inject
@@ -47,6 +49,7 @@ class EditArticleActivity : AppCompatActivity() {
     private var authorIds = mutableListOf<Int>()
     private var tagNames = mutableListOf<String>()
     private var tagIds = mutableListOf<Int>()
+    private var selectedTagIds = mutableListOf<Int>()
 
     private var selectedImageUri: Uri? = null
     private var selectedImageBase64: String? = null
@@ -119,10 +122,8 @@ class EditArticleActivity : AppCompatActivity() {
         }
         binding.spAuthor.adapter = authorAdapter
 
-        val tagAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, tagNames).apply {
-            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        }
-        binding.spTags.adapter = tagAdapter
+        // Инициализируем отображение выбранных тегов
+        updateSelectedTagsDisplay()
     }
 
     private fun loadData() {
@@ -146,7 +147,9 @@ class EditArticleActivity : AppCompatActivity() {
                     tagNames.add(it.name)
                     tagIds.add(it.tagId)
                 }
-                (binding.spTags.adapter as ArrayAdapter<*>).notifyDataSetChanged()
+
+                // После загрузки тегов обновляем отображение выбранных тегов
+                updateSelectedTagsDisplay()
 
             } catch (e: Exception) {
                 Snackbar.make(binding.root, "Ошибка загрузки данных: ${e.localizedMessage}", Snackbar.LENGTH_LONG).show()
@@ -177,13 +180,28 @@ class EditArticleActivity : AppCompatActivity() {
                 val authorIndex = authorIds.indexOf(it.authorId)
                 if (authorIndex >= 0) binding.spAuthor.setSelection(authorIndex)
 
+                // ИСПРАВЛЕНИЕ: Правильная загрузка тегов - ждем загрузки списка тегов
+                lifecycleScope.launch {
+                    // Ждем пока загрузятся теги
+                    while (tagIds.isEmpty()) {
+                        delay(100)
+                    }
+
+                    // Очищаем выбранные теги и добавляем теги статьи
+                    selectedTagIds.clear()
+                    it.tags.forEach { tag ->
+                        selectedTagIds.add(tag.tagId)
+                    }
+
+                    // Принудительно обновляем отображение после загрузки
+                    updateSelectedTagsDisplay()
+                }
+
                 // Load image if exists
-                if (!it.imageUrl.isNullOrEmpty() && it.imageUrl.startsWith("data:image")) {
+                if (!it.imageUrl.isNullOrEmpty()) {
                     try {
-                        // Extract base64 from data URL
-                        val base64Data = it.imageUrl.substring(it.imageUrl.indexOf(",") + 1)
-                        selectedImageBase64 = base64Data
-                        displaySelectedImage(base64Data)
+                        selectedImageBase64 = it.imageUrl
+                        displaySelectedImage(it.imageUrl)
                     } catch (e: Exception) {
                         // Ignore image loading errors
                     }
@@ -206,6 +224,10 @@ class EditArticleActivity : AppCompatActivity() {
             clearSelectedImage()
         }
 
+        binding.btnSelectTags.setOnClickListener {
+            showTagSelectionDialog()
+        }
+
         binding.btnSave.setOnClickListener {
             if (validateInput()) {
                 saveArticle(articleId)
@@ -218,6 +240,95 @@ class EditArticleActivity : AppCompatActivity() {
 
         binding.toolbar.setNavigationOnClickListener {
             onBackPressed()
+        }
+    }
+
+    private fun showTagSelectionDialog() {
+        if (tagNames.isEmpty()) {
+            Toast.makeText(this, "Теги не загружены", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val checkedItems = BooleanArray(tagNames.size) { index ->
+            selectedTagIds.contains(tagIds[index])
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Выберите теги")
+            .setMultiChoiceItems(tagNames.toTypedArray(), checkedItems) { _, which, isChecked ->
+                val tagId = tagIds[which]
+                if (isChecked) {
+                    if (!selectedTagIds.contains(tagId)) {
+                        selectedTagIds.add(tagId)
+                    }
+                } else {
+                    selectedTagIds.remove(tagId)
+                }
+            }
+            .setPositiveButton("ОК") { _, _ ->
+                updateSelectedTagsDisplay()
+            }
+            .setNegativeButton("Отмена", null)
+            .setNeutralButton("Добавить новый тег") { _, _ ->
+                showAddNewTagDialog()
+            }
+            .show()
+    }
+
+    private fun showAddNewTagDialog() {
+        val input = EditText(this).apply {
+            hint = "Название нового тега"
+            setPadding(60, 40, 60, 40)
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Добавить новый тег")
+            .setView(input)
+            .setPositiveButton("Создать") { _, _ ->
+                val newTagName = input.text.toString().trim()
+                if (newTagName.isNotEmpty()) {
+                    createNewTag(newTagName)
+                } else {
+                    Toast.makeText(this, "Введите название тега", Toast.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("Отмена", null)
+            .show()
+    }
+
+    private fun createNewTag(tagName: String) {
+        lifecycleScope.launch {
+            try {
+                val newTag = api.createTag(tagName)
+                // Добавляем новый тег в списки
+                tagNames.add(newTag.name)
+                tagIds.add(newTag.tagId)
+                selectedTagIds.add(newTag.tagId)
+                updateSelectedTagsDisplay()
+                Toast.makeText(this@EditArticleActivity, "Тег '$tagName' создан и добавлен", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                Toast.makeText(this@EditArticleActivity, "Ошибка создания тега: ${e.localizedMessage}", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    // ИСПРАВЛЕНИЕ: Улучшенный метод обновления отображения тегов
+    private fun updateSelectedTagsDisplay() {
+        if (tagIds.isEmpty()) {
+            // Если теги еще не загружены, отображаем загрузку
+            binding.tvSelectedTags.text = "Загрузка тегов..."
+            return
+        }
+
+        val selectedTagNames = selectedTagIds.mapNotNull { selectedId ->
+            val index = tagIds.indexOf(selectedId)
+            if (index >= 0 && index < tagNames.size) tagNames[index] else null
+        }
+
+        binding.tvSelectedTags.text = if (selectedTagNames.isEmpty()) {
+            "Теги не выбраны"
+        } else {
+            selectedTagNames.joinToString(", ")
         }
     }
 
@@ -320,7 +431,6 @@ class EditArticleActivity : AppCompatActivity() {
                 binding.progressBar.visibility = View.VISIBLE
 
                 val selectedAuthorId = authorIds.getOrNull(binding.spAuthor.selectedItemPosition) ?: return@launch
-                val selectedTagId = if (tagIds.isNotEmpty()) tagIds.getOrNull(binding.spTags.selectedItemPosition) else null
 
                 val success = viewModel.save(
                     articleId = articleId,
@@ -329,11 +439,12 @@ class EditArticleActivity : AppCompatActivity() {
                     statusId = statusPairs[binding.spStatus.selectedItemPosition].second,
                     authorId = selectedAuthorId,
                     imageBase64 = selectedImageBase64,
-                    tagIds = selectedTagId?.let { listOf(it) } ?: emptyList()
+                    tagIds = selectedTagIds
                 )
 
                 if (success) {
                     Toast.makeText(this@EditArticleActivity, "Статья сохранена", Toast.LENGTH_SHORT).show()
+                    setResult(RESULT_OK)
                     finish()
                 } else {
                     Snackbar.make(binding.root, "Ошибка сохранения", Snackbar.LENGTH_LONG).show()
@@ -364,6 +475,7 @@ class EditArticleActivity : AppCompatActivity() {
             try {
                 viewModel.delete(articleId)
                 Toast.makeText(this@EditArticleActivity, "Статья удалена", Toast.LENGTH_SHORT).show()
+                setResult(RESULT_OK)
                 finish()
             } catch (e: Exception) {
                 Snackbar.make(binding.root, "Ошибка удаления: ${e.localizedMessage}", Snackbar.LENGTH_LONG).show()

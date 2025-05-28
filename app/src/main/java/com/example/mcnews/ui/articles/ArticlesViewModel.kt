@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.mcnews.domain.model.Article
 import com.example.mcnews.domain.repo.ArticleRepository
+import com.example.mcnews.data.remote.ApiService
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -20,7 +21,8 @@ sealed interface State {
 
 @HiltViewModel
 class ArticlesViewModel @Inject constructor(
-    private val repo: ArticleRepository
+    private val repo: ArticleRepository,
+    private val apiService: ApiService
 ) : ViewModel() {
 
     private val _state = MutableLiveData<State>()
@@ -35,6 +37,31 @@ class ArticlesViewModel @Inject constructor(
             val errorMessage = when (e.code()) {
                 500 -> "Ошибка сервера. Попробуйте позже."
                 404 -> "Статьи не найдены"
+                422 -> "Ошибка параметров запроса"
+                else -> "HTTP ошибка: ${e.code()} - ${e.message()}"
+            }
+            _state.value = State.Error(errorMessage)
+        } catch (e: IOException) {
+            _state.value = State.Error("Ошибка сети. Проверьте подключение к интернету.")
+        } catch (e: Exception) {
+            val errorMessage = e.localizedMessage ?: "Неизвестная ошибка: ${e.javaClass.simpleName}"
+            _state.value = State.Error(errorMessage)
+        }
+    }
+
+    // ИСПРАВЛЕНИЕ: Более эффективный метод для загрузки статей пользователя
+    fun loadUserArticles(userId: Int) = viewModelScope.launch {
+        _state.value = State.Loading
+        try {
+            // ИСПРАВЛЕНИЕ: Используем меньший лимит для избежания ошибки 422
+            val articles = repo.getArticles(skip = 0, limit = 100)
+            val userArticles = articles.filter { it.authorId == userId }
+            _state.value = State.Data(userArticles)
+        } catch (e: HttpException) {
+            val errorMessage = when (e.code()) {
+                500 -> "Ошибка сервера. Попробуйте позже."
+                404 -> "Статьи не найдены"
+                422 -> "Ошибка параметров запроса. Попробуйте позже."
                 else -> "HTTP ошибка: ${e.code()} - ${e.message()}"
             }
             _state.value = State.Error(errorMessage)

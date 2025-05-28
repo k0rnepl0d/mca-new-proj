@@ -43,7 +43,8 @@ class RegisterActivity : AppCompatActivity() {
         viewModel.authState.observe(this) { state ->
             when (state) {
                 is AuthState.Idle -> {
-                    // Начальное состояние
+                    binding.btnRegister.isEnabled = true
+                    binding.btnRegister.text = "Зарегистрироваться"
                 }
                 is AuthState.Loading -> {
                     binding.btnRegister.isEnabled = false
@@ -77,7 +78,7 @@ class RegisterActivity : AppCompatActivity() {
                     lastName = binding.etLastName.text.toString().trim(),
                     middleName = binding.etMiddleName.text.toString().trim().takeIf { it.isNotEmpty() },
                     birthDate = selectedDate,
-                    genderId = binding.spGender.selectedItemPosition + 1, // 1 для мужского, 2 для женского
+                    genderId = binding.spGender.selectedItemPosition + 1,
                     email = binding.etEmail.text.toString().trim(),
                     login = binding.etLogin.text.toString().trim()
                 )
@@ -131,6 +132,10 @@ class RegisterActivity : AppCompatActivity() {
             }
             password.isEmpty() -> {
                 Toast.makeText(this, "Введите пароль", Toast.LENGTH_SHORT).show()
+                false
+            }
+            password.length < 6 -> { // ИСПРАВЛЕНИЕ: Добавляем проверку минимальной длины
+                Toast.makeText(this, "Пароль должен содержать минимум 6 символов", Toast.LENGTH_SHORT).show()
                 false
             }
             selectedDate.isEmpty() -> {

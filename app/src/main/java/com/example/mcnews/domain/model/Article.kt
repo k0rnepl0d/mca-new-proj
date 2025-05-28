@@ -8,5 +8,6 @@ data class Article(
     val imageUrl: String?,
     val statusId: Int,
     val createdAt: String,
-    val tags: List<Tag> = emptyList()
+    val tags: List<Tag> = emptyList(),
+    val authorName: String? = null
 )
