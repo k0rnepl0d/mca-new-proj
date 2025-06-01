@@ -13,6 +13,6 @@ data class UserDto(
     @Json(name = "GenderId") val genderId: Int,
     @Json(name = "Email") val email: String,
     @Json(name = "Login") val login: String,
-    @Json(name = "Photo") val photo: String?, // base64 строка
+    @Json(name = "Photo") val photo: String?,
     @Json(name = "CreatedAt") val createdAt: String
 )

@@ -18,7 +18,6 @@ class LoginActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Проверяем, авторизован ли уже пользователь
         viewModel.checkAuthStatus()
         if (viewModel.isLoggedIn.value == true) {
             startActivity(Intent(this, MainActivity::class.java))
@@ -37,7 +36,6 @@ class LoginActivity : AppCompatActivity() {
         viewModel.authState.observe(this) { state ->
             when (state) {
                 is AuthState.Idle -> {
-                    // Начальное состояние
                     binding.btnLogin.isEnabled = true
                     binding.btnLogin.text = "Войти"
                 }

@@ -134,7 +134,7 @@ class RegisterActivity : AppCompatActivity() {
                 Toast.makeText(this, "Введите пароль", Toast.LENGTH_SHORT).show()
                 false
             }
-            password.length < 6 -> { // ИСПРАВЛЕНИЕ: Добавляем проверку минимальной длины
+            password.length < 6 -> {
                 Toast.makeText(this, "Пароль должен содержать минимум 6 символов", Toast.LENGTH_SHORT).show()
                 false
             }

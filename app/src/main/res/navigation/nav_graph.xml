@@ -7,7 +7,7 @@
     <fragment
         android:id="@+id/splashFragment"
         android:name="com.example.mcnews.ui.splash.SplashFragment"
-        android:label="Микроконтроллеры">
+        android:label="Фармацевтика">
         <action
             android:id="@+id/action_splash_to_articles"
             app:destination="@id/articlesFragment"
@@ -52,7 +52,6 @@
             app:popUpToInclusive="false" />
     </fragment>
 
-    <!-- ДОБАВЛЕНИЕ: Фрагмент "Ваши статьи" -->
     <fragment
         android:id="@+id/userArticlesFragment"
         android:name="com.example.mcnews.ui.articles.UserArticlesFragment"

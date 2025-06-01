@@ -41,7 +41,6 @@ class ArticlesAdapter(
             tvTitle.text = article.title
             tvBody.text = if (article.body.length > 120) article.body.take(120) + "…" else article.body
 
-            // Отображение даты публикации
             try {
                 val dateFormat = SimpleDateFormat("dd.MM.yyyy HH:mm", Locale.getDefault())
                 val inputFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
@@ -49,12 +48,10 @@ class ArticlesAdapter(
                 tvDate.text = date?.let { dateFormat.format(it) } ?: article.createdAt
                 tvDate.visibility = View.VISIBLE
             } catch (e: Exception) {
-                // Если не удалось распарсить дату, показываем как есть
                 tvDate.text = article.createdAt
                 tvDate.visibility = View.VISIBLE
             }
 
-            // Обрабатываем изображение
             if (!article.imageUrl.isNullOrEmpty()) {
                 try {
                     val imageBytes = Base64.decode(article.imageUrl, Base64.DEFAULT)

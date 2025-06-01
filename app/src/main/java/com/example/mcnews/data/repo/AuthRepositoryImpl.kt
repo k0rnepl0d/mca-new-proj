@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/mcnews/data/repo/AuthRepositoryImpl.kt
 package com.example.mcnews.data.repo
 
 import com.example.mcnews.data.remote.AuthService
@@ -21,14 +20,12 @@ class AuthRepositoryImpl @Inject constructor(
             val response = authService.login(LoginRequest(login, password))
             return response.accessToken
         } catch (e: HttpException) {
-            // Попытаемся извлечь детали ошибки
             val errorBody = e.response()?.errorBody()?.string()
             if (errorBody != null) {
                 try {
                     val errorDto = moshi.adapter(ErrorDto::class.java).fromJson(errorBody)
                     throw Exception(errorDto?.detail ?: e.message())
                 } catch (ex: Exception) {
-                    // Если не удалось распарсить, используем стандартное сообщение
                     throw Exception("Ошибка входа: ${e.code()}")
                 }
             }
@@ -63,14 +60,12 @@ class AuthRepositoryImpl @Inject constructor(
                 createdAt = response.createdAt
             )
         } catch (e: HttpException) {
-            // Попытаемся извлечь детали ошибки
             val errorBody = e.response()?.errorBody()?.string()
             if (errorBody != null) {
                 try {
                     val errorDto = moshi.adapter(ErrorDto::class.java).fromJson(errorBody)
                     throw Exception(errorDto?.detail ?: e.message())
                 } catch (ex: Exception) {
-                    // Если не удалось распарсить, используем стандартное сообщение
                     throw Exception("Ошибка регистрации: ${e.code()}")
                 }
             }

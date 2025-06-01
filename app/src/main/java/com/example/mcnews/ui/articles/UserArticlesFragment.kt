@@ -30,12 +30,10 @@ class UserArticlesFragment : Fragment() {
 
     @Inject lateinit var api: ApiService
 
-    // Launcher для редактирования статей с обновлением списка
     private val editArticleLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            // Обновляем список статей пользователя
             loadUserArticles()
         }
     }
@@ -46,7 +44,7 @@ class UserArticlesFragment : Fragment() {
                 putExtra("title", article.title)
                 putExtra("body", article.body)
                 putExtra("imageUrl", article.imageUrl)
-                putExtra("author", "Вы") // Поскольку это статьи пользователя
+                putExtra("author", "Вы")
                 putExtra("createdAt", article.createdAt)
                 putStringArrayListExtra("tags", ArrayList(article.tags.map { it.name }))
             })
@@ -66,10 +64,8 @@ class UserArticlesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Скрываем поиск для экрана "Ваши статьи"
         binding.searchView.visibility = View.GONE
 
-        // Показываем FAB для добавления новых статей
         binding.fabAdd.visibility = View.VISIBLE
         binding.fabAdd.setOnClickListener {
             editArticleLauncher.launch(Intent(requireContext(), EditArticleActivity::class.java))
@@ -105,9 +101,7 @@ class UserArticlesFragment : Fragment() {
     private fun loadUserArticles() {
         lifecycleScope.launch {
             try {
-                // Получаем ID текущего пользователя
                 val currentUser = api.getCurrentUser()
-                // Загружаем статьи только этого пользователя
                 viewModel.loadUserArticles(currentUser.userId)
             } catch (e: Exception) {
                 Snackbar.make(binding.root, "Ошибка загрузки ваших статей: ${e.localizedMessage}", Snackbar.LENGTH_LONG).show()

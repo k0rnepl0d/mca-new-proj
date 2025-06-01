@@ -1,4 +1,3 @@
-
 package com.example.mcnews.data.remote.dto
 
 import com.squareup.moshi.Json

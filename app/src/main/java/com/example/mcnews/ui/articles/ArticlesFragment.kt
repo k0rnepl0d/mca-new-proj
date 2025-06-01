@@ -22,9 +22,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
-import android.view.ViewGroup
 
 @AndroidEntryPoint
 class ArticlesFragment : Fragment() {
@@ -40,12 +37,10 @@ class ArticlesFragment : Fragment() {
 
     @Inject lateinit var api: ApiService
 
-    // Launcher для редактирования/создания статей с обновлением списка
     private val editArticleLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            // Обновляем список статей
             viewModel.load(tagId = selectedTagId, search = binding.searchView.query.toString().trim().takeIf { it.isNotBlank() })
         }
     }
@@ -53,6 +48,7 @@ class ArticlesFragment : Fragment() {
     private val adapter = ArticlesAdapter(
         onClick = { article ->
             startActivity(Intent(requireContext(), com.example.mcnews.ui.articles.ArticleDetailActivity::class.java).apply {
+                putExtra("articleId", article.articleId)
                 putExtra("title", article.title)
                 putExtra("body", article.body)
                 putExtra("imageUrl", article.imageUrl)
@@ -123,32 +119,12 @@ class ArticlesFragment : Fragment() {
         binding.fabAdd.setOnClickListener {
             editArticleLauncher.launch(Intent(requireContext(), EditArticleActivity::class.java))
         }
-
-        // ИСПРАВЛЕНИЕ: Используем правильные WindowInsets
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { view, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            val navigationBars = insets.getInsets(WindowInsetsCompat.Type.navigationBars())
-
-            // Устанавливаем отступ FAB с учетом системных панелей
-            val fabLayoutParams = binding.fabAdd.layoutParams as ViewGroup.MarginLayoutParams
-            fabLayoutParams.bottomMargin = 16.dpToPx() + navigationBars.bottom
-            fabLayoutParams.rightMargin = 16.dpToPx() + systemBars.right
-            binding.fabAdd.layoutParams = fabLayoutParams
-
-            // Также обновляем padding для RecyclerView
-            binding.recycler.setPadding(
-                binding.recycler.paddingLeft,
-                binding.recycler.paddingTop,
-                binding.recycler.paddingRight,
-                navigationBars.bottom + 80.dpToPx() // FAB размер + отступ
-            )
-
-            insets
-        }
-    }
-
-    private fun Int.dpToPx(): Int {
-        return (this * requireContext().resources.displayMetrics.density).toInt()
+        binding.recycler.setPadding(
+            binding.recycler.paddingLeft,
+            binding.recycler.paddingTop,
+            binding.recycler.paddingRight,
+            120
+        )
     }
 
     private fun setupObservers() {
@@ -211,20 +187,6 @@ class ArticlesFragment : Fragment() {
 
             override fun onNothingSelected(parent: AdapterView<*>) = Unit
         }
-    }
-
-    override fun onResume() {
-        super.onResume()
-        // ИСПРАВЛЕНИЕ: Дополнительная проверка при возврате на экран
-        binding.fabAdd.visibility = View.VISIBLE
-        binding.fabAdd.show()
-    }
-
-    override fun onStart() {
-        super.onStart()
-        // ИСПРАВЛЕНИЕ: Еще одна проверка при старте фрагмента
-        binding.fabAdd.visibility = View.VISIBLE
-        binding.fabAdd.show()
     }
 
     override fun onDestroyView() {

@@ -31,7 +31,6 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Title Section -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -49,7 +48,6 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Body Section -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -69,7 +67,6 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Image Section -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -137,7 +134,6 @@
 
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Author Section -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -154,7 +150,6 @@
                 android:background="@drawable/spinner_background"
                 android:padding="12dp" />
 
-            <!-- Status Section -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -171,7 +166,6 @@
                 android:background="@drawable/spinner_background"
                 android:padding="12dp" />
 
-            <!-- ИЗМЕНЕНИЕ: Tags Section - заменяем спиннер на кнопку выбора -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -199,7 +193,6 @@
                 android:padding="8dp"
                 android:background="@drawable/search_view_background" />
 
-            <!-- Progress Bar -->
             <ProgressBar
                 android:id="@+id/progressBar"
                 android:layout_width="wrap_content"
@@ -208,7 +201,6 @@
                 android:visibility="gone"
                 android:layout_marginBottom="16dp" />
 
-            <!-- Action Buttons -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

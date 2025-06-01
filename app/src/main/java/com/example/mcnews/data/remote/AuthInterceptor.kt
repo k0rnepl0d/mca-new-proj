@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/mcnews/data/remote/AuthInterceptor.kt
 package com.example.mcnews.data.remote
 
 import com.example.mcnews.utils.TokenManager
@@ -14,7 +13,6 @@ class AuthInterceptor @Inject constructor(
     override fun intercept(chain: Interceptor.Chain): Response {
         val originalRequest = chain.request()
 
-        // Получаем токен
         val token = tokenManager.getToken()
 
         Log.d("AuthInterceptor", "Token: ${if (token != null) "Present" else "Null"}")

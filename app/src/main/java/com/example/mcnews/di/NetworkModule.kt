@@ -27,7 +27,6 @@ object NetworkModule {
             .add(KotlinJsonAdapterFactory())
             .build()
 
-    /** OkHttp-клиент с авторизацией и логированием */
     @Provides
     @Singleton
     fun provideOkHttp(authInterceptor: AuthInterceptor): OkHttpClient {
@@ -35,7 +34,7 @@ object NetworkModule {
             level = HttpLoggingInterceptor.Level.BODY
         }
         return OkHttpClient.Builder()
-            .addInterceptor(authInterceptor) // Добавляем AuthInterceptor
+            .addInterceptor(authInterceptor)
             .addInterceptor(logging)
             .connectTimeout(30, TimeUnit.SECONDS)
             .readTimeout(30, TimeUnit.SECONDS)
@@ -47,7 +46,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(moshi: Moshi, client: OkHttpClient): Retrofit =
         Retrofit.Builder()
-            .baseUrl("http://10.0.2.2:8000/")           // адрес API
+            .baseUrl("http://10.0.2.2:8000/")
             .client(client)
             .addConverterFactory(MoshiConverterFactory.create(moshi))
             .build()

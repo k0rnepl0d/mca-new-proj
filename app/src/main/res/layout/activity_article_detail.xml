@@ -1,66 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:orientation="vertical"
-        android:padding="16dp"
+    <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
-            android:id="@+id/imgCover"
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:scaleType="centerCrop"
-            android:visibility="gone"/>
+            android:layout_height="?attr/actionBarSize"
+            app:title="Статья"
+            app:navigationIcon="@drawable/ic_arrow_back"
+            android:background="?attr/colorPrimary"
+            android:theme="@style/ThemeOverlay.Material3.Dark.ActionBar" />
 
-        <TextView
-            android:id="@+id/tvTitle"
-            android:textSize="24sp"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp"
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:padding="16dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content">
 
-        <!-- ДОБАВЛЕНИЕ: Автор -->
-        <TextView
-            android:id="@+id/tvAuthor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
-            android:visibility="gone"/>
+            <ImageView
+                android:id="@+id/imgCover"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:scaleType="centerCrop"
+                android:visibility="gone"/>
 
-        <!-- ДОБАВЛЕНИЕ: Дата публикации -->
-        <TextView
-            android:id="@+id/tvDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:textSize="14sp"
-            android:textColor="@android:color/darker_gray"
-            android:visibility="gone"/>
+            <TextView
+                android:id="@+id/tvTitle"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
 
-        <!-- ДОБАВЛЕНИЕ: Теги -->
-        <TextView
-            android:id="@+id/tvTags"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:textSize="14sp"
-            android:textColor="?attr/colorPrimary"
-            android:visibility="gone"/>
+            <TextView
+                android:id="@+id/tvAuthor"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray"
+                android:visibility="gone"/>
 
-        <TextView
-            android:id="@+id/tvBody"
-            android:layout_marginTop="16dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textSize="16sp"
-            android:lineSpacingExtra="4dp"/>
+            <TextView
+                android:id="@+id/tvDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="14sp"
+                android:textColor="@android:color/darker_gray"
+                android:visibility="gone"/>
 
-    </LinearLayout>
-</ScrollView>
+            <TextView
+                android:id="@+id/tvTags"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textSize="14sp"
+                android:textColor="?attr/colorPrimary"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/tvBody"
+                android:layout_marginTop="16dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="16sp"
+                android:lineSpacingExtra="4dp"/>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnExportPdf"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Экспорт в PDF"
+                app:icon="@drawable/ic_picture_as_pdf"
+                style="@style/Widget.Material3.Button.OutlinedButton" />
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="16dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

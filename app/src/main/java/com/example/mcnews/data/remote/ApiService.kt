@@ -1,4 +1,3 @@
-// Обновление ApiService.kt - добавляем endpoint для создания тегов
 package com.example.mcnews.data.remote
 
 import com.example.mcnews.data.remote.dto.*
@@ -53,17 +52,18 @@ interface ApiService {
     @DELETE("articles/{id}")
     suspend fun deleteArticle(@Path("id") id: Int): Response<Unit>
 
+    @GET("articles/{id}/pdf")
+    suspend fun getArticlePdf(@Path("id") id: Int): Response<ResponseBody>
+
     @GET("tags/")
     suspend fun getTags(): List<TagDto>
 
-    // ДОБАВЛЕНИЕ: Endpoint для создания новых тегов
     @POST("tags/")
     suspend fun createTag(@Query("name") name: String): TagDto
 
     @GET("users/")
     suspend fun getAuthors(): List<AuthorDto>
 
-    // User profile endpoints
     @GET("users/me")
     suspend fun getCurrentUser(): UserDto
 

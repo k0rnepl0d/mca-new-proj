@@ -53,7 +53,6 @@ class ProfileFragment : Fragment() {
     private var selectedImageUri: Uri? = null
     private var selectedImageBase64: String? = null
 
-    // Activity result launchers
     private val imagePickerLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
@@ -68,7 +67,6 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // Permission launcher для сохранения файлов
     private val storagePermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
@@ -103,14 +101,12 @@ class ProfileFragment : Fragment() {
                 val user = apiService.getCurrentUser()
                 currentUser = user
 
-                // Заполняем поля
                 binding.etFirstName.setText(user.firstName)
                 binding.etLastName.setText(user.lastName)
                 binding.etMiddleName.setText(user.middleName ?: "")
                 binding.etEmail.setText(user.email)
                 binding.etLogin.setText(user.login)
 
-                // Загружаем аватар если есть
                 user.photo?.let { base64Photo ->
                     displayAvatar(base64Photo)
                 }
@@ -192,13 +188,11 @@ class ProfileFragment : Fragment() {
             inputStream?.close()
 
             if (bitmap != null) {
-                // Сжимаем изображение и конвертируем в base64
                 val byteArrayOutputStream = java.io.ByteArrayOutputStream()
                 bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
                 val byteArray = byteArrayOutputStream.toByteArray()
                 selectedImageBase64 = Base64.encodeToString(byteArray, Base64.DEFAULT)
 
-                // Отображаем изображение
                 binding.imgAvatar.setImageBitmap(bitmap)
                 binding.btnRemoveAvatar.visibility = View.VISIBLE
             } else {
@@ -244,13 +238,11 @@ class ProfileFragment : Fragment() {
                     return@launch
                 }
 
-                // Подготавливаем multipart запрос
                 val firstNamePart = firstName.toRequestBody("text/plain".toMediaTypeOrNull())
                 val lastNamePart = lastName.toRequestBody("text/plain".toMediaTypeOrNull())
                 val middleNamePart = middleName.toRequestBody("text/plain".toMediaTypeOrNull())
                 val emailPart = email.toRequestBody("text/plain".toMediaTypeOrNull())
 
-                // Корректная обработка фото
                 val photoPart = if (selectedImageUri != null && selectedImageBase64 != null) {
                     try {
                         val imageBytes = Base64.decode(selectedImageBase64, Base64.DEFAULT)
@@ -273,7 +265,6 @@ class ProfileFragment : Fragment() {
 
                 Toast.makeText(requireContext(), "Профиль обновлен", Toast.LENGTH_SHORT).show()
 
-                // Сбрасываем состояние выбранного изображения
                 selectedImageUri = null
                 selectedImageBase64 = null
 

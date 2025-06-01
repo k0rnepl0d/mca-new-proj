@@ -14,17 +14,14 @@
         android:theme="@style/Theme.MCNews"
         android:requestLegacyExternalStorage="true">
 
-        <!-- Активность входа -->
         <activity
             android:name=".ui.auth.LoginActivity"
             android:exported="false" />
 
-        <!-- Активность регистрации -->
         <activity
             android:name=".ui.auth.RegisterActivity"
             android:exported="false" />
 
-        <!-- Главная активность - стартовая для тестирования -->
         <activity
             android:name=".ui.MainActivity"
             android:exported="true">
@@ -43,7 +40,6 @@
             android:exported="false"
             android:label="Edit article" />
 
-        <!-- FileProvider для работы с камерой и файлами -->
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

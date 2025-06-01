@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <network-security-config>
-    <!-- Разрешаем только этот «домен» -->
     <domain-config cleartextTrafficPermitted="true">
-        <!-- includeSubdomains = true на случай 10.0.2.2:port -->
         <domain includeSubdomains="true">10.0.2.2</domain>
     </domain-config>
 </network-security-config>

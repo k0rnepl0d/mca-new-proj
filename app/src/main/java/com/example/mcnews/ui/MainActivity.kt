@@ -22,11 +22,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Проверяем авторизацию перед созданием UI
         authViewModel.checkAuthStatus()
 
         if (!authViewModel.isLoggedIn.value!!) {
-            // Если не авторизован, сразу перенаправляем на LoginActivity
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
             return
@@ -38,10 +36,8 @@ class MainActivity : AppCompatActivity() {
         val navController = findNavController(R.id.nav_host_fragment)
         setupActionBarWithNavController(navController)
 
-        // Наблюдаем за изменениями статуса авторизации
         authViewModel.isLoggedIn.observe(this) { isLoggedIn ->
             if (!isLoggedIn && hasCheckedAuth) {
-                // Если пользователь вышел из системы
                 startActivity(Intent(this, LoginActivity::class.java))
                 finish()
             }
@@ -57,12 +53,10 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_my_articles -> {
-                // ДОБАВЛЕНИЕ: Навигация к "Ваши статьи"
                 findNavController(R.id.nav_host_fragment).navigate(R.id.userArticlesFragment)
                 true
             }
             R.id.action_profile -> {
-                // Навигация к профилю
                 findNavController(R.id.nav_host_fragment).navigate(R.id.profileFragment)
                 true
             }

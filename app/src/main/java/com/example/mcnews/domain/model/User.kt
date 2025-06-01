@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/mcnews/domain/model/User.kt
 package com.example.mcnews.domain.model
 
 data class User(
@@ -11,6 +10,4 @@ data class User(
     val email: String,
     val login: String,
     val createdAt: String = ""
-) {
-    val fullName: String get() = "$firstName $lastName"
-}
+)

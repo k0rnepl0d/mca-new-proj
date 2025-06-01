@@ -1,4 +1,3 @@
-
 package com.example.mcnews
 
 import android.app.Application

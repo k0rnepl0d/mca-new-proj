@@ -20,7 +20,6 @@ sealed interface AuthState {
     data class Error(val message: String) : AuthState
 }
 
-// Для совместимости с существующим кодом
 val AuthState.isLoggedIn: Boolean get() = this is AuthState.Success
 
 @HiltViewModel
@@ -41,7 +40,6 @@ class AuthViewModel @Inject constructor(
             val token = authRepository.login(login, password)
             Log.d("AuthViewModel", "Login successful. Token: ${token.take(20)}...")
 
-            // Сохраняем токен
             tokenManager.saveToken(token, login)
             Log.d("AuthViewModel", "Token saved. IsLoggedIn: ${tokenManager.isLoggedIn()}")
 
@@ -52,7 +50,6 @@ class AuthViewModel @Inject constructor(
             _isLoggedIn.value = false
             val errorMessage = when (e.code()) {
                 400 -> {
-                    // Попытаемся извлечь детали ошибки из тела ответа
                     try {
                         val errorBody = e.response()?.errorBody()?.string()
                         if (errorBody?.contains("Invalid credentials") == true) {
@@ -82,7 +79,6 @@ class AuthViewModel @Inject constructor(
             val registeredUser = authRepository.register(user, password)
             Log.d("AuthViewModel", "Registration successful")
 
-            // После регистрации автоматически логинимся
             val token = authRepository.login(user.login, password)
             Log.d("AuthViewModel", "Auto-login successful. Token: ${token.take(20)}...")
 
@@ -94,7 +90,6 @@ class AuthViewModel @Inject constructor(
             _isLoggedIn.value = false
             val errorMessage = when (e.code()) {
                 400 -> {
-                    // Попытаемся извлечь детали ошибки из тела ответа
                     try {
                         val errorBody = e.response()?.errorBody()?.string()
                         when {

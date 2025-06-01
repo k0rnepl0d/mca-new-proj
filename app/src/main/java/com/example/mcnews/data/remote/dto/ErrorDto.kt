@@ -1,4 +1,3 @@
-// app/src/main/java/com/example/mcnews/data/remote/dto/ErrorDto.kt
 package com.example.mcnews.data.remote.dto
 
 import com.squareup.moshi.Json

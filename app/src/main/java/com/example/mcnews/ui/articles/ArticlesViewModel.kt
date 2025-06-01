@@ -49,11 +49,9 @@ class ArticlesViewModel @Inject constructor(
         }
     }
 
-    // ИСПРАВЛЕНИЕ: Более эффективный метод для загрузки статей пользователя
     fun loadUserArticles(userId: Int) = viewModelScope.launch {
         _state.value = State.Loading
         try {
-            // ИСПРАВЛЕНИЕ: Используем меньший лимит для избежания ошибки 422
             val articles = repo.getArticles(skip = 0, limit = 100)
             val userArticles = articles.filter { it.authorId == userId }
             _state.value = State.Data(userArticles)

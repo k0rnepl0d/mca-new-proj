@@ -54,7 +54,6 @@ class EditArticleActivity : AppCompatActivity() {
     private var selectedImageUri: Uri? = null
     private var selectedImageBase64: String? = null
 
-    // Activity result launchers
     private val imagePickerLauncher = registerForActivityResult(
         ActivityResultContracts.GetContent()
     ) { uri ->
@@ -108,7 +107,6 @@ class EditArticleActivity : AppCompatActivity() {
             "Новая статья"
         }
 
-        // Setup spinners
         binding.spStatus.adapter = ArrayAdapter(
             this,
             android.R.layout.simple_spinner_item,
@@ -122,14 +120,12 @@ class EditArticleActivity : AppCompatActivity() {
         }
         binding.spAuthor.adapter = authorAdapter
 
-        // Инициализируем отображение выбранных тегов
         updateSelectedTagsDisplay()
     }
 
     private fun loadData() {
         lifecycleScope.launch {
             try {
-                // Load authors
                 val authors = api.getAuthors()
                 authorNames.clear()
                 authorIds.clear()
@@ -139,7 +135,6 @@ class EditArticleActivity : AppCompatActivity() {
                 }
                 (binding.spAuthor.adapter as ArrayAdapter<*>).notifyDataSetChanged()
 
-                // Load tags
                 val tags = api.getTags()
                 tagNames.clear()
                 tagIds.clear()
@@ -148,7 +143,6 @@ class EditArticleActivity : AppCompatActivity() {
                     tagIds.add(it.tagId)
                 }
 
-                // После загрузки тегов обновляем отображение выбранных тегов
                 updateSelectedTagsDisplay()
 
             } catch (e: Exception) {
@@ -172,39 +166,30 @@ class EditArticleActivity : AppCompatActivity() {
                 binding.etTitle.setText(it.title)
                 binding.etBody.setText(it.body)
 
-                // Set status
                 val statusIndex = statusPairs.indexOfFirst { pair -> pair.second == it.statusId }
                 if (statusIndex >= 0) binding.spStatus.setSelection(statusIndex)
 
-                // Set author
                 val authorIndex = authorIds.indexOf(it.authorId)
                 if (authorIndex >= 0) binding.spAuthor.setSelection(authorIndex)
 
-                // ИСПРАВЛЕНИЕ: Правильная загрузка тегов - ждем загрузки списка тегов
                 lifecycleScope.launch {
-                    // Ждем пока загрузятся теги
                     while (tagIds.isEmpty()) {
                         delay(100)
                     }
 
-                    // Очищаем выбранные теги и добавляем теги статьи
                     selectedTagIds.clear()
                     it.tags.forEach { tag ->
                         selectedTagIds.add(tag.tagId)
                     }
 
-                    // Принудительно обновляем отображение после загрузки
                     updateSelectedTagsDisplay()
                 }
 
-                // Load image if exists
                 if (!it.imageUrl.isNullOrEmpty()) {
                     try {
                         selectedImageBase64 = it.imageUrl
                         displaySelectedImage(it.imageUrl)
-                    } catch (e: Exception) {
-                        // Ignore image loading errors
-                    }
+                    } catch (e: Exception) { }
                 }
             }
         }
@@ -300,7 +285,6 @@ class EditArticleActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val newTag = api.createTag(tagName)
-                // Добавляем новый тег в списки
                 tagNames.add(newTag.name)
                 tagIds.add(newTag.tagId)
                 selectedTagIds.add(newTag.tagId)
@@ -312,10 +296,8 @@ class EditArticleActivity : AppCompatActivity() {
         }
     }
 
-    // ИСПРАВЛЕНИЕ: Улучшенный метод обновления отображения тегов
     private fun updateSelectedTagsDisplay() {
         if (tagIds.isEmpty()) {
-            // Если теги еще не загружены, отображаем загрузку
             binding.tvSelectedTags.text = "Загрузка тегов..."
             return
         }
@@ -371,7 +353,6 @@ class EditArticleActivity : AppCompatActivity() {
             val inputStream: InputStream? = contentResolver.openInputStream(uri)
             val bitmap = BitmapFactory.decodeStream(inputStream)
 
-            // Convert to base64
             val byteArrayOutputStream = ByteArrayOutputStream()
             bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 80, byteArrayOutputStream)
             val byteArray = byteArrayOutputStream.toByteArray()

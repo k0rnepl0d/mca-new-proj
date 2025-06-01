@@ -1,4 +1,3 @@
-
 package com.example.mcnews.domain.model
 
 data class Author(

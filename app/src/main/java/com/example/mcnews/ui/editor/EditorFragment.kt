@@ -1,4 +1,3 @@
-
 package com.example.mcnews.ui.editor
 
 import android.os.Bundle
